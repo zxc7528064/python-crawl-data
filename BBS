@@ -1,0 +1,34 @@
+#!/usr/bin/python
+#-*-coding:utf-8-*-
+import requests #requests模組中的 get 方式，抓取URL資訊
+import urllib.request #類似requests模組，抓取URL資訊
+from bs4 import BeautifulSoup #從bs4中引用BeautifulSoup模組
+import os #下系統指令
+import time #使用sleep函式(延遲)
+
+
+url ='https://www.google.com/search?q=美女&client=safari&rls=en&sxsrf=ALeKk0003shd9ALgu_iYIcoQ8eSuaoVPZw:1596514108548&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiwmsbC1oDrAhWrKqYKHdhcDdUQ_AUoAXoECBAQAw&biw=1336&bih=728'
+photolimit = 10 #小於10頁的時候
+headers = {
+    'User-Agent':'Mozilla/5.0'
+}
+response = requests.get(url,headers=headers) #使用header避免訪問受到限制
+soup = BeautifulSoup(response.content,'html.parser') #使用BeautifulSoup中的content屬性抓取子節點
+items = soup.find_all('img') #使用BeautifulSoup中的find_all函式抓取img字串，成為一個List
+folder_path = './photo/'
+if(os.path.exists(folder_path)) == False: #判斷資料夾不存在
+    os.makedirs(folder_path) #創建目錄
+    print('創建成功')
+else:
+    print('資料夾已存在')
+for index,item in enumerate(items): #從items進行枚舉
+    if(item and index < photolimit): #item為True(存在) 和 index < photolimit 為True
+        html = requests.get(item.get('src')) # use 'get' to get photo link path
+        img_name = folder_path + str(index + 1) + '.png'
+        print(img_name)
+        
+        with open(img_name,'wb') as file: #open函式用於打開一個文件，'wb'代表以二進制格式打開一個文件只用於寫。如果該文件已存在則打開文件，並從開頭開始編輯，即內部內容會被刪除。如果該文件不存在，創建新文件。 把值賦予給 file 這個變量
+        file.close() #關閉檔案
+        print('第 %d 張' % (index + 1)) #打印第幾張
+        time.sleep(1) #延遲1秒
+print('Finish')
